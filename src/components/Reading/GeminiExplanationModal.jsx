@@ -153,24 +153,32 @@ export default function GeminiExplanationModal() {
           ) : result ? (
             <div>
               {/* Badge da Fonte de Resposta */}
-              <div className="flex items-center justify-between mb-3 text-[11px]">
-                <span className="font-bold text-[#7A151C] dark:text-[#8B1C24] bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-[11px]">
+                <span className={`font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
+                  result.source === 'gemini_api'
+                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800'
+                    : result.source === 'api_error_fallback'
+                    ? 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800'
+                    : 'text-[#7A151C] dark:text-[#8B1C24] bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 border border-[#7A151C]/20'
+                }`}>
                   <Sparkles className="w-3 h-3" />
-                  {result.source === 'gemini_api' ? 'Resposta via Gemini API (Online)' : 'Resposta via Motor Exegético Solus'}
+                  {result.source === 'gemini_api' 
+                    ? `Resposta via Gemini API (${result.modelUsed || 'Online'})` 
+                    : result.source === 'api_error_fallback' 
+                    ? '⚠️ Falha na API Gemini / Chave Invalida (Exibindo Motor Local)' 
+                    : 'Resposta via Motor Exegético Solus'}
                 </span>
 
-                {result.source !== 'gemini_api' && (
-                  <button
-                    onClick={() => {
-                      setGeminiVerseModal(null);
-                      setIsSettingsOpen(true);
-                    }}
-                    className="text-[11px] text-[#7A151C] dark:text-[#8B1C24] hover:underline font-bold flex items-center gap-1"
-                  >
-                    <Key className="w-3 h-3" />
-                    <span>Adicionar Chave API Gemini</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setGeminiVerseModal(null);
+                    setIsSettingsOpen(true);
+                  }}
+                  className="text-[11px] text-[#7A151C] dark:text-[#8B1C24] hover:underline font-bold flex items-center gap-1"
+                >
+                  <Key className="w-3 h-3" />
+                  <span>{result.source === 'gemini_api' ? 'Alterar Chave API' : 'Verificar Chave API Gemini'}</span>
+                </button>
               </div>
 
               {renderFormattedText(result.text)}
