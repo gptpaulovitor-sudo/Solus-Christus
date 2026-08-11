@@ -74,12 +74,16 @@ export default function HeaderSidebar() {
 
             <button 
               onClick={() => setActiveTab('home')}
-              class="flex items-center gap-2.5 font-cinzel text-lg font-bold text-[#7A151C] dark:text-[#EAE6DF] hover:opacity-90 transition-opacity"
+              class="flex items-center gap-3 font-cinzel text-lg font-bold text-[#7A151C] dark:text-[#EAE6DF] hover:opacity-90 transition-opacity"
+              style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
             >
-              <div class="w-9 h-9 rounded-xl bg-[#7A151C] dark:bg-[#8B1C24] flex items-center justify-center text-[#EAE6DF] shadow-md shrink-0">
-                <BookOpen class="w-5 h-5 text-[#EAE6DF]" />
-              </div>
-              <span class="hidden sm:inline tracking-wider font-bold">Solus Christus</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32" className="shrink-0 rounded-xl shadow-xs">
+                <rect width="100" height="100" rx="20" fill="#7A151C" />
+                <path d="M 25 70 Q 50 85 50 60 Q 50 85 75 70 L 75 75 Q 50 90 50 65 Q 50 90 25 75 Z" fill="#F9F7F1" />
+                <rect x="46" y="25" width="8" height="40" rx="2" fill="#F9F7F1" />
+                <rect x="34" y="38" width="32" height="8" rx="2" fill="#F9F7F1" />
+              </svg>
+              <span class="tracking-wider font-bold text-xs sm:text-sm md:text-base">SOLUS CHRISTUS</span>
             </button>
 
             {/* Quick Passage Selector Pill */}
@@ -243,14 +247,10 @@ export default function HeaderSidebar() {
         </div>
 
         {/* Footer info */}
-        <div class="text-[11px] text-[#52525B] dark:text-[#A1A1AA] border-t border-[#E4E4E7] dark:border-[#27272A] pt-3 space-y-1">
-          <p class="font-cinzel font-bold text-[#7A151C] dark:text-[#8B1C24] uppercase tracking-wider text-xs">SOLUS CHRISTUS</p>
-          <p class="font-crimson italic text-[#232323] dark:text-[#EAE6DF] text-[11px] leading-snug">
-            “Cristo no centro. A Palavra como fundamento. A fé como caminho.”
-          </p>
-          <p class="font-sans font-medium text-[10px] text-[#52525B] dark:text-[#A1A1AA] pt-0.5">
-            Por <span class="font-semibold text-[#232323] dark:text-[#EAE6DF]">Paulo Vitor Ribeiro de Sousa</span>
-          </p>
+        <div style={{ padding: '16px 0px', borderTop: '1px solid #E4E4E7', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ fontFamily: "'Cinzel', serif", color: '#7A151C', fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase' }}>Solus Christus</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", color: '#52525B', fontSize: '11px', fontStyle: 'italic', lineHeight: '1.4' }}>“Cristo no centro. A Palavra como fundamento. A fé como caminho.”</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", color: '#A1A1AA', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>Paulo Vitor Ribeiro de Sousa</span>
         </div>
       </aside>
 
@@ -267,11 +267,14 @@ export default function HeaderSidebar() {
             <div class="space-y-6">
               {/* Drawer Header */}
               <div class="flex items-center justify-between pb-3 border-b border-[#E4E4E7] dark:border-[#27272A]">
-                <div class="flex items-center gap-2.5 font-cinzel text-base font-bold text-[#7A151C] dark:text-[#EAE6DF]">
-                  <div class="w-8 h-8 rounded-xl bg-[#7A151C] dark:bg-[#8B1C24] flex items-center justify-center text-[#EAE6DF] shadow-md">
-                    <BookOpen class="w-4 h-4 text-[#EAE6DF]" />
-                  </div>
-                  <span>Solus Christus</span>
+                <div class="flex items-center gap-3 font-cinzel text-base font-bold text-[#7A151C] dark:text-[#EAE6DF]" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32" className="shrink-0 rounded-xl shadow-xs">
+                    <rect width="100" height="100" rx="20" fill="#7A151C" />
+                    <path d="M 25 70 Q 50 85 50 60 Q 50 85 75 70 L 75 75 Q 50 90 50 65 Q 50 90 25 75 Z" fill="#F9F7F1" />
+                    <rect x="46" y="25" width="8" height="40" rx="2" fill="#F9F7F1" />
+                    <rect x="34" y="38" width="32" height="8" rx="2" fill="#F9F7F1" />
+                  </svg>
+                  <span>SOLUS CHRISTUS</span>
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -338,14 +341,10 @@ export default function HeaderSidebar() {
             </div>
 
             {/* Footer App Info */}
-            <div class="text-[11px] text-[#52525B] dark:text-[#A1A1AA] border-t border-[#E4E4E7] dark:border-[#27272A] pt-4 space-y-1">
-              <p class="font-cinzel font-bold text-[#7A151C] dark:text-[#8B1C24] uppercase tracking-wider text-xs">SOLUS CHRISTUS</p>
-              <p class="font-crimson italic text-[#232323] dark:text-[#EAE6DF] text-[11px] leading-snug">
-                “Cristo no centro. A Palavra como fundamento. A fé como caminho.”
-              </p>
-              <p class="font-sans font-medium text-[10px] text-[#52525B] dark:text-[#A1A1AA] pt-0.5">
-                Por <span class="font-semibold text-[#232323] dark:text-[#EAE6DF]">Paulo Vitor Ribeiro de Sousa</span>
-              </p>
+            <div style={{ padding: '16px 0px', borderTop: '1px solid #E4E4E7', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontFamily: "'Cinzel', serif", color: '#7A151C', fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase' }}>Solus Christus</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", color: '#52525B', fontSize: '11px', fontStyle: 'italic', lineHeight: '1.4' }}>“Cristo no centro. A Palavra como fundamento. A fé como caminho.”</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", color: '#A1A1AA', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>Paulo Vitor Ribeiro de Sousa</span>
             </div>
           </div>
         </div>

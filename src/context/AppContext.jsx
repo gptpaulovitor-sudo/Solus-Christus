@@ -52,7 +52,7 @@ export function AppProvider({ children }) {
     if (settings.fontFamily === 'sans') {
       root.style.setProperty('--font-leitura', "'Inter', sans-serif");
     } else {
-      root.style.setProperty('--font-leitura', "'Crimson Pro', 'Lora', serif");
+      root.style.setProperty('--font-leitura', "'Crimson Pro', serif");
     }
 
     storageService.saveSettings(settings);
