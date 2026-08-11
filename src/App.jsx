@@ -19,11 +19,20 @@ function AppContent() {
       <HeaderSidebar />
 
       {/* Main Content Area */}
-      <div class="md:pl-64 transition-all">
-        {activeTab === 'home' && <DashboardView />}
-        {activeTab === 'reader' && <BibleReader />}
-        {activeTab === 'plans' && <PlansView />}
-        {activeTab === 'profile' && <ProfileView />}
+      <div class="md:pl-64 transition-all min-h-[calc(100vh-64px)] flex flex-col justify-between">
+        <div>
+          {activeTab === 'home' && <DashboardView />}
+          {activeTab === 'reader' && <BibleReader />}
+          {activeTab === 'plans' && <PlansView />}
+          {activeTab === 'profile' && <ProfileView />}
+        </div>
+
+        {/* Mobile Page Footer (Visível no rodapé de todas as telas no celular) */}
+        <footer style={{ padding: '24px 16px', borderTop: '1px solid #E4E4E7', marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'center', marginBottom: '72px' }} class="md:hidden border-t border-[#E4E4E7] dark:border-[#27272A]">
+          <span style={{ fontFamily: "'Cinzel', serif", color: '#7A151C', fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase' }} class="dark:text-[#EAE6DF]">Solus Christus</span>
+          <span style={{ fontFamily: "'Inter', sans-serif", color: '#52525B', fontSize: '11px', fontStyle: 'italic', lineHeight: '1.4' }} class="dark:text-[#A1A1AA]">“Cristo no centro. A Palavra como fundamento. A fé como caminho.”</span>
+          <span style={{ fontFamily: "'Inter', sans-serif", color: '#A1A1AA', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }} class="dark:text-[#71717A]">Paulo Vitor Ribeiro de Sousa</span>
+        </footer>
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
