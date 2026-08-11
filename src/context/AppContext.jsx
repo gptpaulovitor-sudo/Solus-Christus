@@ -31,6 +31,9 @@ export function AppProvider({ children }) {
   // Modal de Configurações
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Modal de Explicação Gemini AI { livroId, livroNome, capitulo, versiculo, texto }
+  const [geminiVerseModal, setGeminiVerseModal] = useState(null);
+
   // Modal de Plano Personalizado
   const [isCustomPlanOpen, setIsCustomPlanOpen] = useState(false);
 
@@ -326,7 +329,9 @@ export function AppProvider({ children }) {
         toastMessage,
         showToast,
         ofensivaDias,
-        registrarAtividadeHoje
+        registrarAtividadeHoje,
+        geminiVerseModal,
+        setGeminiVerseModal
       }}
     >
       {children}

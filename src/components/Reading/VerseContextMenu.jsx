@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Highlighter, NotebookPen, Copy, Share2, Trash2, Check } from 'lucide-react';
+import { X, Highlighter, NotebookPen, Copy, Share2, Trash2, Check, Sparkles } from 'lucide-react';
 import { LIVROS_BIBLIA } from '../../data/bibliaACF';
 
 export default function VerseContextMenu() {
-  const { selectedVerseModal, setSelectedVerseModal, salvarVersiculoMarcado, versiculosMarcados, showToast } = useApp();
+  const { selectedVerseModal, setSelectedVerseModal, salvarVersiculoMarcado, versiculosMarcados, showToast, setGeminiVerseModal } = useApp();
 
   if (!selectedVerseModal) return null;
 
@@ -139,25 +139,39 @@ export default function VerseContextMenu() {
         </div>
 
         {/* Modal Footer Buttons */}
-        <div class="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between gap-2">
-          <button
-            onClick={handleCopy}
-            class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-semibold transition-colors"
-          >
-            {isCopied ? <Check class="w-4 h-4 text-emerald-500" /> : <Copy class="w-4 h-4" />}
-            <span>{isCopied ? 'Copiado!' : 'Copiar'}</span>
-          </button>
+        <div class="pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-semibold transition-colors"
+            >
+              {isCopied ? <Check class="w-4 h-4 text-emerald-500" /> : <Copy class="w-4 h-4" />}
+              <span>{isCopied ? 'Copiado!' : 'Copiar'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const modalData = { ...selectedVerseModal, livroNome: livroObj.nome };
+                setSelectedVerseModal(null);
+                setGeminiVerseModal(modalData);
+              }}
+              class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 hover:bg-[#7A151C]/20 text-[#7A151C] dark:text-[#8B1C24] text-xs font-bold transition-all border border-[#7A151C]/30"
+            >
+              <Sparkles class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
+              <span>Explicar com Gemini</span>
+            </button>
+          </div>
 
           <div class="flex items-center gap-2">
             <button
               onClick={() => setSelectedVerseModal(null)}
-              class="px-4 py-2.5 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-semibold transition-colors"
+              class="px-3 py-2.5 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-semibold transition-colors"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
-              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all scale-100 active:scale-95"
+              class="px-4 py-2.5 rounded-xl bg-[#7A151C] hover:bg-[#681117] dark:bg-[#8B1C24] dark:hover:bg-[#7A151C] text-white text-xs font-bold shadow-md transition-all scale-100 active:scale-95"
             >
               Salvar Anotação
             </button>

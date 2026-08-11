@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { geminiService } from '../../services/geminiService';
 import { X, Type, Sun, Moon, Sparkles, Columns, AlignLeft } from 'lucide-react';
 
 export default function ReadingSettingsModal() {
   const { isSettingsOpen, setIsSettingsOpen, settings, setSettings } = useApp();
+  const [geminiApiKey, setGeminiApiKey] = useState(() => geminiService.getApiKey());
 
   if (!isSettingsOpen) return null;
 
@@ -159,6 +161,37 @@ export default function ReadingSettingsModal() {
                 <span>Em linha Expansível</span>
               </button>
             </div>
+          </div>
+
+          {/* Gemini API Key */}
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
+                <Sparkles class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
+                <span>Chave API Gemini (Opcional)</span>
+              </label>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-[11px] text-[#7A151C] dark:text-[#8B1C24] hover:underline font-semibold"
+              >
+                Gerar chave grátis &rarr;
+              </a>
+            </div>
+            <input
+              type="password"
+              placeholder="Cole sua API Key do Gemini aqui..."
+              value={geminiApiKey}
+              onChange={(e) => {
+                setGeminiApiKey(e.target.value);
+                geminiService.saveApiKey(e.target.value);
+              }}
+              class="w-full px-3 py-2 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#7A151C] text-[#232323] dark:text-[#EAE6DF]"
+            />
+            <p class="text-[10px] text-stone-400 mt-1">
+              Sem a chave, a aplicação utilizará automaticamente o motor exegético local integrado.
+            </p>
           </div>
         </div>
 

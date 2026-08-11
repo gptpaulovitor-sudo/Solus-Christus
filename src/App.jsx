@@ -8,6 +8,7 @@ import PlansView from './components/Plans/PlansView';
 import ProfileView from './components/Profile/ProfileView';
 import VerseContextMenu from './components/Reading/VerseContextMenu';
 import ReadingSettingsModal from './components/Reading/ReadingSettingsModal';
+import GeminiExplanationModal from './components/Reading/GeminiExplanationModal';
 import Toast from './components/Common/Toast';
 
 function AppContent() {
@@ -41,6 +42,7 @@ function AppContent() {
       {/* Floating Modals */}
       <VerseContextMenu />
       <ReadingSettingsModal />
+      <GeminiExplanationModal />
       <Toast />
     </div>
   );
