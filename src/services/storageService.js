@@ -120,24 +120,11 @@ export const storageService = {
       const data = localStorage.getItem(KEYS.ATIVIDADE);
       if (data) {
         const parsed = JSON.parse(data);
-        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+        if (parsed && typeof parsed === 'object') {
           return parsed;
         }
       }
-
-      // Gerar histórico inicial de 7 dias consecutivos até hoje para demonstração
-      const inicial = {};
-      const hoje = new Date();
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(hoje);
-        d.setDate(d.getDate() - i);
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        inicial[`${y}-${m}-${day}`] = true;
-      }
-      localStorage.setItem(KEYS.ATIVIDADE, JSON.stringify(inicial));
-      return inicial;
+      return {};
     } catch (e) {
       return {};
     }

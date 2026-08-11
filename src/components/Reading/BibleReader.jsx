@@ -150,15 +150,12 @@ export default function BibleReader() {
             return (
               <div key={item.v} class="group relative inline">
                 <span
-                  onClick={() => {
-                    registrarAtividadeHoje();
-                    setSelectedVerseModal({
-                      livroId: posicao.livroId,
-                      capitulo: posicao.capitulo,
-                      versiculo: item.v,
-                      texto: item.t
-                    });
-                  }}
+                  onClick={() => setSelectedVerseModal({
+                    livroId: posicao.livroId,
+                    capitulo: posicao.capitulo,
+                    versiculo: item.v,
+                    texto: item.t
+                  })}
                   class={`
                     inline rounded-md px-1.5 py-0.5 cursor-pointer transition-all duration-150 hover:bg-amber-100/70 dark:hover:bg-amber-900/40 text-stone-900 dark:text-zinc-100
                     ${highlightClass}

@@ -119,14 +119,8 @@ export function AppProvider({ children }) {
       dataCheck = new Date(hoje);
     } else if (registros && registros[ontemStr]) {
       dataCheck = new Date(ontem);
-    } else if (registros && Object.keys(registros).length > 0) {
-      // Buscar a maior sequência ininterrupta a partir da última leitura registrada
-      const datasOrdenadas = Object.keys(registros).filter(k => registros[k]).sort().reverse();
-      if (datasOrdenadas.length === 0) return 0;
-      const [y, m, day] = datasOrdenadas[0].split('-').map(Number);
-      dataCheck = new Date(y, m - 1, day);
     } else {
-      return 0;
+      return 0; // Sem marcação explícita de leitura hoje ou ontem = 0 Dias
     }
 
     let count = 0;
