@@ -165,7 +165,7 @@ export default function GeminiExplanationModal() {
                   {result.source === 'gemini_api' 
                     ? `Resposta via Gemini API (${result.modelUsed || 'Online'})` 
                     : result.source === 'api_error_fallback' 
-                    ? '⚠️ Falha na API Gemini / Chave Invalida (Exibindo Motor Local)' 
+                    ? `⚠️ Gemini: ${result.errorMessage || 'Falha na Chave/API'} (Exibindo Motor Local)` 
                     : 'Resposta via Motor Exegético Solus'}
                 </span>
 

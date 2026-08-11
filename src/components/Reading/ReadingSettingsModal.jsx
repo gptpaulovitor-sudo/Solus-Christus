@@ -6,6 +6,7 @@ import { X, Type, Sun, Moon, Sparkles, Columns, AlignLeft } from 'lucide-react';
 export default function ReadingSettingsModal() {
   const { isSettingsOpen, setIsSettingsOpen, settings, setSettings } = useApp();
   const [geminiApiKey, setGeminiApiKey] = useState(() => geminiService.getApiKey());
+  const [testStatus, setTestStatus] = useState(null);
 
   if (!isSettingsOpen) return null;
 
@@ -179,16 +180,44 @@ export default function ReadingSettingsModal() {
                 Gerar chave grátis &rarr;
               </a>
             </div>
-            <input
-              type="password"
-              placeholder="Cole sua API Key do Gemini aqui..."
-              value={geminiApiKey}
-              onChange={(e) => {
-                setGeminiApiKey(e.target.value);
-                geminiService.saveApiKey(e.target.value);
-              }}
-              class="w-full px-3 py-2 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#7A151C] text-[#232323] dark:text-[#EAE6DF]"
-            />
+
+            <div class="flex items-center gap-2">
+              <input
+                type="password"
+                placeholder="Cole sua API Key do Gemini aqui..."
+                value={geminiApiKey}
+                onChange={(e) => {
+                  const cleaned = geminiService.saveApiKey(e.target.value);
+                  setGeminiApiKey(cleaned);
+                  setTestStatus(null);
+                }}
+                class="flex-1 px-3 py-2 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#7A151C] text-[#232323] dark:text-[#EAE6DF]"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  setTestStatus({ loading: true });
+                  const cleaned = geminiService.saveApiKey(geminiApiKey);
+                  setGeminiApiKey(cleaned);
+                  const res = await geminiService.testarApiKey(cleaned);
+                  setTestStatus(res);
+                }}
+                class="px-3 py-2 bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 hover:bg-[#7A151C]/20 text-[#7A151C] dark:text-[#8B1C24] text-xs font-bold rounded-xl border border-[#7A151C]/30 shrink-0"
+              >
+                {testStatus?.loading ? 'Testando...' : 'Testar Chave'}
+              </button>
+            </div>
+
+            {testStatus && !testStatus.loading && (
+              <div class={`mt-2 p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 ${
+                testStatus.ok 
+                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300' 
+                  : 'bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-200 border border-red-300'
+              }`}>
+                <span>{testStatus.ok ? '✅ Chave API válida e conectada com sucesso!' : `❌ Falha: ${testStatus.error}`}</span>
+              </div>
+            )}
+
             <p class="text-[10px] text-stone-400 mt-1">
               Sem a chave, a aplicação utilizará automaticamente o motor exegético local integrado.
             </p>

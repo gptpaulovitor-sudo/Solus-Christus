@@ -6,11 +6,39 @@ export const geminiService = {
   },
 
   saveApiKey(key) {
-    localStorage.setItem('solus_gemini_api_key', (key || '').trim());
+    const cleaned = (key || '').replace(/[\s\r\n"']/g, '').trim();
+    localStorage.setItem('solus_gemini_api_key', cleaned);
+    return cleaned;
+  },
+
+  async testarApiKey(key) {
+    const cleanedKey = (key || '').replace(/[\s\r\n"']/g, '').trim();
+    if (!cleanedKey) return { ok: false, error: 'Por favor, digite uma chave de API.' };
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleanedKey}`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Responda "OK"' }] }]
+        })
+      });
+
+      if (response.ok) {
+        return { ok: true };
+      } else {
+        const data = await response.json().catch(() => ({}));
+        return { ok: false, error: data.error?.message || `Erro HTTP ${response.status}` };
+      }
+    } catch (err) {
+      return { ok: false, error: err.message || 'Erro de conexão de rede ou bloqueio CORS.' };
+    }
   },
 
   async explicarVersiculo({ livroNome, capitulo, versiculo, texto }) {
-    const apiKey = this.getApiKey();
+    const rawKey = this.getApiKey();
+    const apiKey = rawKey.replace(/[\s\r\n"']/g, '').trim();
 
     const prompt = `Atue como um teólogo exegético e pastor cristão reformado. Analise o seguinte versículo bíblico (${livroNome} ${capitulo}:${versiculo}):
 "${texto}"
@@ -26,35 +54,43 @@ Explique como esta passagem específica (${livroNome} ${capitulo}:${versiculo}) 
 ### 3. 🛡️ Aplicação Prática para a Vida Diária
 Forneça 3 passos/reflexões extremamente práticos e específicos para aplicar este ensino hoje.`;
 
-    if (apiKey) {
-      // Testar modelos em ordem
-      const models = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-pro'];
+    let apiErrorMessage = null;
 
-      for (const model of models) {
+    if (apiKey) {
+      // Testar endpoints oficiais do Gemini
+      const endpoints = [
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`
+      ];
+
+      for (const url of endpoints) {
         try {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-              })
-            }
-          );
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
 
           if (response.ok) {
             const data = await response.json();
             const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (textResponse) {
-              return { text: textResponse, source: 'gemini_api', modelUsed: model };
+              const modelMatch = url.match(/models\/([^:]+)/);
+              const modelUsed = modelMatch ? modelMatch[1] : 'gemini-flash';
+              return { text: textResponse, source: 'gemini_api', modelUsed };
             }
           } else {
-            const errJson = await response.json().catch(() => ({}));
-            console.warn(`Gemini API (${model}) status ${response.status}:`, errJson);
+            const errData = await response.json().catch(() => ({}));
+            apiErrorMessage = errData.error?.message || `Erro HTTP ${response.status} na API Gemini`;
+            console.warn(`Erro no endpoint ${url}:`, errData);
           }
         } catch (err) {
-          console.warn(`Erro de conexão com Gemini API (${model}):`, err);
+          apiErrorMessage = err.message || 'Erro de conexão com o servidor do Gemini';
+          console.warn(`Erro ao conectar no endpoint ${url}:`, err);
         }
       }
     }
@@ -81,7 +117,8 @@ Sob a verdade de *Solus Christus*, a mensagem de ${livroNome} ${capitulo}:${vers
 
     return { 
       text: explicacaoLocal, 
-      source: apiKey ? 'api_error_fallback' : 'local' 
+      source: apiKey ? 'api_error_fallback' : 'local',
+      errorMessage: apiErrorMessage
     };
   }
 };
