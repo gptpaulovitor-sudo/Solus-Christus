@@ -27,6 +27,13 @@ export default function GeminiExplanationModal() {
     setLoading(true);
     setResult(null);
 
+    // Timeout de emergência para garantir que nunca fique preso carregando
+    const safetyTimer = setTimeout(() => {
+      if (isMounted && loading) {
+        setLoading(false);
+      }
+    }, 4500);
+
     geminiService.explicarVersiculo({
       livroNome: geminiVerseModal.livroNome,
       capitulo: geminiVerseModal.capitulo,
@@ -34,16 +41,21 @@ export default function GeminiExplanationModal() {
       texto: geminiVerseModal.texto
     }).then(res => {
       if (isMounted) {
+        clearTimeout(safetyTimer);
         setResult(res);
         setLoading(false);
       }
     }).catch(err => {
       if (isMounted) {
+        clearTimeout(safetyTimer);
         setLoading(false);
       }
     });
 
-    return () => { isMounted = false; };
+    return () => { 
+      isMounted = false; 
+      clearTimeout(safetyTimer);
+    };
   }, [geminiVerseModal]);
 
   if (!geminiVerseModal) return null;

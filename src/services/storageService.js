@@ -1,19 +1,27 @@
-import { PLANOS_PREDEFINIDOS } from '../data/planosPreset';
-import { calcularPlanoPersonalizado } from './planCalculator';
+import { LIVROS_BIBLIA } from '../data/bibliaACF';
 
+// Chaves do LocalStorage
 const KEYS = {
-  SETTINGS: 'biblia_estudo_settings',
-  PROGRESSO_CAPITULOS: 'biblia_estudo_progresso',
-  VERSICULOS_MARCADOS: 'biblia_estudo_marcacoes',
-  PLANO_ATIVO: 'biblia_estudo_plano_ativo',
-  POSICAO_LEITURA: 'biblia_estudo_posicao'
+  SETTINGS: 'solus_settings',
+  POSICAO: 'solus_posicao_leitura',
+  PROGRESSO_CAPITULOS: 'solus_progresso_capitulos',
+  VERSICULOS_MARCADOS: 'solus_versiculos_marcados',
+  PLANO_ATIVO: 'solus_plano_ativo',
+  ATIVIDADE: 'biblia_estudo_atividade'
 };
 
+// Configurações padrão
 const DEFAULT_SETTINGS = {
-  fontSize: 18, // 14px - 28px
+  theme: 'light', // light | dark | sepia
+  fontSize: 'medium', // small | medium | large | xlarge
   fontFamily: 'serif', // serif | sans
-  theme: 'dark', // light | dark | sepia
-  layoutMode: 'split', // split (side-by-side desktop / footer mobile) | inline
+  layoutMode: 'side' // side | inline
+};
+
+// Posição inicial de leitura
+const DEFAULT_POSICAO = {
+  livroId: 'genesis',
+  capitulo: 1
 };
 
 export const storageService = {
@@ -30,32 +38,32 @@ export const storageService = {
     try {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
     } catch (e) {
-      console.error('Erro ao salvar configurações', e);
+      console.error(e);
     }
   },
 
-  // Posicao de leitura atual { livroId: 'salmos', capitulo: 23 }
+  // Posição de Leitura
   getPosicaoLeitura() {
     try {
-      const data = localStorage.getItem(KEYS.POSICAO_LEITURA);
-      return data ? JSON.parse(data) : { livroId: 'genesis', capitulo: 1 };
+      const data = localStorage.getItem(KEYS.POSICAO);
+      return data ? JSON.parse(data) : DEFAULT_POSICAO;
     } catch (e) {
-      return { livroId: 'genesis', capitulo: 1 };
+      return DEFAULT_POSICAO;
     }
   },
-  savePosicaoLeitura(pos) {
+  savePosicaoLeitura(posicao) {
     try {
-      localStorage.setItem(KEYS.POSICAO_LEITURA, JSON.stringify(pos));
+      localStorage.setItem(KEYS.POSICAO, JSON.stringify(posicao));
     } catch (e) {
       console.error(e);
     }
   },
 
-  // Progresso de capitulos lidos { 'genesis-1': true }
+  // Progresso de Capítulos Lido
   getProgressoCapitulos() {
     try {
       const data = localStorage.getItem(KEYS.PROGRESSO_CAPITULOS);
-      return data ? JSON.parse(data) : { 'genesis-1': true };
+      return data ? JSON.parse(data) : {};
     } catch (e) {
       return {};
     }
@@ -68,81 +76,39 @@ export const storageService = {
     }
   },
 
-  // Versiculos Marcados (Highlights e Bloco de Notas)
+  // Versículos Marcados / Anotações
   getVersiculosMarcados() {
     try {
       const data = localStorage.getItem(KEYS.VERSICULOS_MARCADOS);
-      if (data) return JSON.parse(data);
-      // Dados iniciais de demonstração ricos
-      return [
-        {
-          id: 'v_salmos_23_1',
-          livroId: 'salmos',
-          capitulo: 23,
-          versiculo: 1,
-          cor: 'yellow',
-          nota: 'Minha âncora de descanso nas tribulações.',
-          data: new Date().toISOString()
-        },
-        {
-          id: 'v_joao_1_1',
-          livroId: 'joao',
-          capitulo: 1,
-          versiculo: 1,
-          cor: 'blue',
-          nota: 'A divindade absoluta de Jesus Cristo revelada.',
-          data: new Date().toISOString()
-        }
-      ];
+      return data ? JSON.parse(data) : [];
     } catch (e) {
       return [];
     }
   },
-  saveVersiculosMarcados(marcacoes) {
+  saveVersiculosMarcados(versiculos) {
     try {
-      localStorage.setItem(KEYS.VERSICULOS_MARCADOS, JSON.stringify(marcacoes));
+      localStorage.setItem(KEYS.VERSICULOS_MARCADOS, JSON.stringify(versiculos));
     } catch (e) {
       console.error(e);
     }
   },
 
-  // Plano de Leitura Ativo
+  // Plano Ativo de Leitura
   getPlanoAtivo() {
     try {
       const data = localStorage.getItem(KEYS.PLANO_ATIVO);
-      if (data) return JSON.parse(data);
-      
-      // Criar plano de 1 ano por padrão
-      const hoje = new Date();
-      const em1Ano = new Date();
-      em1Ano.setFullYear(hoje.getFullYear() + 1);
-
-      const planoDefault = calcularPlanoPersonalizado({
-        titulo: PLANOS_PREDEFINIDOS[0].titulo,
-        dataInicio: hoje.toISOString().split('T')[0],
-        dataFim: em1Ano.toISOString().split('T')[0],
-        livrosIds: ['todos']
-      });
-
-      // Simular progresso do Dia 1 como concluído
-      planoDefault.progressoDias = { 1: true };
-
-      localStorage.setItem(KEYS.PLANO_ATIVO, JSON.stringify(planoDefault));
-      return planoDefault;
+      return data ? JSON.parse(data) : null;
     } catch (e) {
       return null;
     }
   },
   savePlanoAtivo(plano) {
     try {
-      localStorage.setItem(KEYS.PLANO_ATIVO, JSON.stringify(plano));
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  removerPlanoAtivo() {
-    try {
-      localStorage.setItem(KEYS.PLANO_ATIVO, 'null');
+      if (plano) {
+        localStorage.setItem(KEYS.PLANO_ATIVO, JSON.stringify(plano));
+      } else {
+        localStorage.removeItem(KEYS.PLANO_ATIVO);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -151,10 +117,15 @@ export const storageService = {
   // Registro diário de leitura (Ofensiva / Streak)
   getRegistrosAtividade() {
     try {
-      const data = localStorage.getItem('biblia_estudo_atividade');
-      if (data) return JSON.parse(data);
+      const data = localStorage.getItem(KEYS.ATIVIDADE);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+          return parsed;
+        }
+      }
 
-      // Gerar histórico inicial de 7 dias para demonstração
+      // Gerar histórico inicial de 7 dias consecutivos até hoje para demonstração
       const inicial = {};
       const hoje = new Date();
       for (let i = 0; i < 7; i++) {
@@ -165,7 +136,7 @@ export const storageService = {
         const day = String(d.getDate()).padStart(2, '0');
         inicial[`${y}-${m}-${day}`] = true;
       }
-      localStorage.setItem('biblia_estudo_atividade', JSON.stringify(inicial));
+      localStorage.setItem(KEYS.ATIVIDADE, JSON.stringify(inicial));
       return inicial;
     } catch (e) {
       return {};
@@ -173,7 +144,7 @@ export const storageService = {
   },
   saveRegistrosAtividade(registros) {
     try {
-      localStorage.setItem('biblia_estudo_atividade', JSON.stringify(registros));
+      localStorage.setItem(KEYS.ATIVIDADE, JSON.stringify(registros));
     } catch (e) {
       console.error(e);
     }

@@ -1,5 +1,19 @@
 import { getComentarioCapitulo } from '../data/comentariosEstudo';
 
+// Helper de fetch com Timeout rigoroso de 3.5 segundos
+const fetchWithTimeout = async (url, options = {}, timeoutMs = 3500) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+};
+
 export const geminiService = {
   getApiKey() {
     return localStorage.getItem('solus_gemini_api_key') || '';
@@ -14,7 +28,7 @@ export const geminiService = {
   async obterModelosCompativeis(apiKey) {
     if (!apiKey) return [];
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, {}, 2500);
       if (!response.ok) return [];
       const data = await response.json();
       if (Array.isArray(data.models)) {
@@ -32,10 +46,7 @@ export const geminiService = {
     const cleanedKey = (key || '').replace(/[\s\r\n"']/g, '').trim();
     if (!cleanedKey) return { ok: false, error: 'Por favor, digite uma chave de API.' };
 
-    // 1. Descobrir modelos disponíveis para a chave
     let modelos = await this.obterModelosCompativeis(cleanedKey);
-
-    // Fallback de modelos padrão se listagem falhar
     if (modelos.length === 0) {
       modelos = ['gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-pro'];
     }
@@ -45,13 +56,11 @@ export const geminiService = {
     for (const model of modelos) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanedKey}`;
       try {
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'Responda OK' }] }]
-          })
-        });
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Responda OK' }] }] })
+        }, 3000);
 
         if (response.ok) {
           return { ok: true, modelUsed: model };
@@ -60,7 +69,7 @@ export const geminiService = {
           ultimoErro = data.error?.message || `Erro HTTP ${response.status} no modelo ${model}`;
         }
       } catch (err) {
-        ultimoErro = err.message || 'Erro de conexão ou bloqueio de rede.';
+        ultimoErro = err.name === 'AbortError' ? 'Tempo de conexão esgotado (timeout).' : (err.message || 'Erro de conexão.');
       }
     }
 
@@ -88,9 +97,7 @@ Forneça 3 passos/reflexões extremamente práticos e específicos para aplicar 
     let apiErrorMessage = null;
 
     if (apiKey) {
-      // 1. Obter lista dinâmica de modelos disponíveis para a chave do usuário
       let modelos = await this.obterModelosCompativeis(apiKey);
-
       if (modelos.length === 0) {
         modelos = ['gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-pro'];
       }
@@ -98,13 +105,11 @@ Forneça 3 passos/reflexões extremamente práticos e específicos para aplicar 
       for (const model of modelos) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
         try {
-          const response = await fetch(url, {
+          const response = await fetchWithTimeout(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }]
-            })
-          });
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          }, 3500);
 
           if (response.ok) {
             const data = await response.json();
@@ -115,11 +120,9 @@ Forneça 3 passos/reflexões extremamente práticos e específicos para aplicar 
           } else {
             const errData = await response.json().catch(() => ({}));
             apiErrorMessage = errData.error?.message || `Erro HTTP ${response.status} em ${model}`;
-            console.warn(`Erro no modelo ${model}:`, errData);
           }
         } catch (err) {
-          apiErrorMessage = err.message || 'Erro de conexão com o servidor do Gemini';
-          console.warn(`Erro de conexão no modelo ${model}:`, err);
+          apiErrorMessage = err.name === 'AbortError' ? 'Tempo de resposta da API esgotado (timeout)' : (err.message || 'Erro de conexão');
         }
       }
     }
