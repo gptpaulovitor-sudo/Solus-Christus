@@ -146,5 +146,36 @@ export const storageService = {
     } catch (e) {
       console.error(e);
     }
+  },
+
+  // Registro diário de leitura (Ofensiva / Streak)
+  getRegistrosAtividade() {
+    try {
+      const data = localStorage.getItem('biblia_estudo_atividade');
+      if (data) return JSON.parse(data);
+
+      // Gerar histórico inicial de 7 dias para demonstração
+      const inicial = {};
+      const hoje = new Date();
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(hoje);
+        d.setDate(d.getDate() - i);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        inicial[`${y}-${m}-${day}`] = true;
+      }
+      localStorage.setItem('biblia_estudo_atividade', JSON.stringify(inicial));
+      return inicial;
+    } catch (e) {
+      return {};
+    }
+  },
+  saveRegistrosAtividade(registros) {
+    try {
+      localStorage.setItem('biblia_estudo_atividade', JSON.stringify(registros));
+    } catch (e) {
+      console.error(e);
+    }
   }
 };

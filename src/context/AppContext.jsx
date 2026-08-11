@@ -74,6 +74,64 @@ export function AppProvider({ children }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Registro de Atividade Diária & Cálculo da Ofensiva (Streak)
+  const [registrosAtividade, setRegistrosAtividade] = useState(() => storageService.getRegistrosAtividade());
+
+  const registrarAtividadeHoje = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hojeStr = `${y}-${m}-${day}`;
+
+    if (!registrosAtividade[hojeStr]) {
+      const novos = { ...registrosAtividade, [hojeStr]: true };
+      setRegistrosAtividade(novos);
+      storageService.saveRegistrosAtividade(novos);
+    }
+  };
+
+  // Método para calcular a ofensiva (dias consecutivos de leitura)
+  const calcularOfensivaDias = (registros = {}) => {
+    const formatData = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    const hoje = new Date();
+    const hojeStr = formatData(hoje);
+
+    const ontem = new Date(hoje);
+    ontem.setDate(ontem.getDate() - 1);
+    const ontemStr = formatData(ontem);
+
+    let dataCheck = null;
+    if (registros[hojeStr]) {
+      dataCheck = new Date(hoje);
+    } else if (registros[ontemStr]) {
+      dataCheck = new Date(ontem);
+    } else {
+      return 0;
+    }
+
+    let count = 0;
+    while (true) {
+      const key = formatData(dataCheck);
+      if (registros[key]) {
+        count++;
+        dataCheck.setDate(dataCheck.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return count;
+  };
+
+  const ofensivaDias = calcularOfensivaDias(registrosAtividade);
+
   // Alternar capítulo lido
   const toggleCapituloLido = (livroId, capituloNum) => {
     const key = `${livroId}-${capituloNum}`;
@@ -82,6 +140,7 @@ export function AppProvider({ children }) {
     storageService.saveProgressoCapitulos(novoProgresso);
 
     if (!progressoCapitulos[key]) {
+      registrarAtividadeHoje();
       showToast(`Capítulo de ${LIVROS_BIBLIA.find(l => l.id === livroId)?.nome} ${capituloNum} marcado como lido!`);
     }
   };
@@ -114,11 +173,13 @@ export function AppProvider({ children }) {
           nota: nota !== undefined ? nota : atualizados[index].nota,
           data: dataAtual
         };
+        registrarAtividadeHoje();
         showToast('Anotação/Marcação atualizada!');
       }
     } else {
       if (cor || (nota && nota.trim() !== '')) {
         atualizados.push({ id, livroId, capitulo: capNum, versiculo: verNum, cor: cor || null, nota: nota || '', data: dataAtual });
+        registrarAtividadeHoje();
         showToast('Versículo destacado e salvo!');
       }
     }
@@ -263,7 +324,9 @@ export function AppProvider({ children }) {
         isCustomPlanOpen,
         setIsCustomPlanOpen,
         toastMessage,
-        showToast
+        showToast,
+        ofensivaDias,
+        registrarAtividadeHoje
       }}
     >
       {children}

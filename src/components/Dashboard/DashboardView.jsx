@@ -23,7 +23,8 @@ export default function DashboardView() {
     setActiveTab, 
     irParaCapitulo, 
     progressoCapitulos,
-    versiculosMarcados
+    versiculosMarcados,
+    ofensivaDias
   } = useApp();
 
   // Estatísticas rápidas
@@ -103,7 +104,9 @@ export default function DashboardView() {
             <Flame class="w-5 h-5 text-[#7A151C] dark:text-[#8B1C24] fill-[#7A151C]/20" />
             <div>
               <div class="text-[10px] uppercase font-bold text-[#7A151C] dark:text-[#8B1C24] tracking-wider">Ofensiva</div>
-              <div class="text-sm font-extrabold text-[#232323] dark:text-[#EAE6DF]">7 Dias Seguidos</div>
+              <div class="text-sm font-extrabold text-[#232323] dark:text-[#EAE6DF]">
+                {ofensivaDias} {ofensivaDias === 1 ? 'Dia Seguido' : 'Dias Seguidos'}
+              </div>
             </div>
           </div>
         </div>

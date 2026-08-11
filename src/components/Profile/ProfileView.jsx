@@ -29,7 +29,8 @@ export default function ProfileView() {
     progressoCapitulos,
     marcarLivrosComoLidos,
     planoAtivo,
-    setActiveTab
+    setActiveTab,
+    ofensivaDias
   } = useApp();
 
   const [activeFilterColor, setActiveFilterColor] = useState('all'); // all | yellow | green | blue | pink | notes
@@ -156,7 +157,14 @@ export default function ProfileView() {
         </div>
 
         {/* Quick Stats Pills (5 Métricas) */}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full md:w-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 w-full md:w-auto">
+          <div class="p-3 rounded-2xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 border border-[#7A151C]/30 dark:border-[#8B1C24]/40 text-center">
+            <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel flex items-center justify-center gap-1">
+              <Flame class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24] fill-[#7A151C]/20" />
+              <span>{ofensivaDias}d</span>
+            </div>
+            <div class="text-[10px] text-[#7A151C] dark:text-[#8B1C24] font-bold uppercase tracking-wider">Ofensiva</div>
+          </div>
           <div class="p-3 rounded-2xl bg-[#F9F7F1] dark:bg-[#121212] border border-[#E4E4E7] dark:border-[#27272A] text-center">
             <div class="text-lg font-extrabold text-[#7A151C] dark:text-[#8B1C24] font-cinzel">{totalVersiculosLidos.toLocaleString('pt-BR')}</div>
             <div class="text-[10px] text-[#52525B] dark:text-[#A1A1AA] font-bold uppercase tracking-wider">Versículos</div>
