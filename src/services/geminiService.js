@@ -11,29 +11,60 @@ export const geminiService = {
     return cleaned;
   },
 
+  async obterModelosCompativeis(apiKey) {
+    if (!apiKey) return [];
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (!response.ok) return [];
+      const data = await response.json();
+      if (Array.isArray(data.models)) {
+        return data.models
+          .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+          .map(m => m.name.replace('models/', ''));
+      }
+    } catch (err) {
+      console.warn('Erro ao listar modelos do Gemini:', err);
+    }
+    return [];
+  },
+
   async testarApiKey(key) {
     const cleanedKey = (key || '').replace(/[\s\r\n"']/g, '').trim();
     if (!cleanedKey) return { ok: false, error: 'Por favor, digite uma chave de API.' };
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleanedKey}`;
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Responda "OK"' }] }]
-        })
-      });
+    // 1. Descobrir modelos disponíveis para a chave
+    let modelos = await this.obterModelosCompativeis(cleanedKey);
 
-      if (response.ok) {
-        return { ok: true };
-      } else {
-        const data = await response.json().catch(() => ({}));
-        return { ok: false, error: data.error?.message || `Erro HTTP ${response.status}` };
-      }
-    } catch (err) {
-      return { ok: false, error: err.message || 'Erro de conexão de rede ou bloqueio CORS.' };
+    // Fallback de modelos padrão se listagem falhar
+    if (modelos.length === 0) {
+      modelos = ['gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-pro'];
     }
+
+    let ultimoErro = null;
+
+    for (const model of modelos) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanedKey}`;
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Responda OK' }] }]
+          })
+        });
+
+        if (response.ok) {
+          return { ok: true, modelUsed: model };
+        } else {
+          const data = await response.json().catch(() => ({}));
+          ultimoErro = data.error?.message || `Erro HTTP ${response.status} no modelo ${model}`;
+        }
+      } catch (err) {
+        ultimoErro = err.message || 'Erro de conexão ou bloqueio de rede.';
+      }
+    }
+
+    return { ok: false, error: ultimoErro || 'Sua chave de API foi recusada pelo Google Gemini.' };
   },
 
   async explicarVersiculo({ livroNome, capitulo, versiculo, texto }) {
@@ -57,15 +88,15 @@ Forneça 3 passos/reflexões extremamente práticos e específicos para aplicar 
     let apiErrorMessage = null;
 
     if (apiKey) {
-      // Testar endpoints oficiais do Gemini
-      const endpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`
-      ];
+      // 1. Obter lista dinâmica de modelos disponíveis para a chave do usuário
+      let modelos = await this.obterModelosCompativeis(apiKey);
 
-      for (const url of endpoints) {
+      if (modelos.length === 0) {
+        modelos = ['gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-pro'];
+      }
+
+      for (const model of modelos) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
         try {
           const response = await fetch(url, {
             method: 'POST',
@@ -79,18 +110,16 @@ Forneça 3 passos/reflexões extremamente práticos e específicos para aplicar 
             const data = await response.json();
             const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (textResponse) {
-              const modelMatch = url.match(/models\/([^:]+)/);
-              const modelUsed = modelMatch ? modelMatch[1] : 'gemini-flash';
-              return { text: textResponse, source: 'gemini_api', modelUsed };
+              return { text: textResponse, source: 'gemini_api', modelUsed: model };
             }
           } else {
             const errData = await response.json().catch(() => ({}));
-            apiErrorMessage = errData.error?.message || `Erro HTTP ${response.status} na API Gemini`;
-            console.warn(`Erro no endpoint ${url}:`, errData);
+            apiErrorMessage = errData.error?.message || `Erro HTTP ${response.status} em ${model}`;
+            console.warn(`Erro no modelo ${model}:`, errData);
           }
         } catch (err) {
           apiErrorMessage = err.message || 'Erro de conexão com o servidor do Gemini';
-          console.warn(`Erro ao conectar no endpoint ${url}:`, err);
+          console.warn(`Erro de conexão no modelo ${model}:`, err);
         }
       }
     }
