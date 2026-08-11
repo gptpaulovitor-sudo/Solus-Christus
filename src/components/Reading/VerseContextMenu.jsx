@@ -4,7 +4,15 @@ import { X, Highlighter, NotebookPen, Copy, Share2, Trash2, Check, Sparkles } fr
 import { LIVROS_BIBLIA } from '../../data/bibliaACF';
 
 export default function VerseContextMenu() {
-  const { selectedVerseModal, setSelectedVerseModal, salvarVersiculoMarcado, versiculosMarcados, showToast, setGeminiVerseModal } = useApp();
+  const { 
+    selectedVerseModal, 
+    setSelectedVerseModal, 
+    salvarVersiculoMarcado, 
+    versiculosMarcados, 
+    showToast, 
+    setGeminiVerseModal,
+    registrarAtividadeHoje
+  } = useApp();
 
   if (!selectedVerseModal) return null;
 
@@ -37,6 +45,7 @@ export default function VerseContextMenu() {
   ];
 
   const handleSave = () => {
+    registrarAtividadeHoje();
     salvarVersiculoMarcado({
       livroId,
       capitulo,
@@ -140,10 +149,22 @@ export default function VerseContextMenu() {
 
         {/* Modal Footer Buttons */}
         <div class="pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => {
+                registrarAtividadeHoje();
+                showToast(`Leitura de ${livroObj.nome} ${capitulo}:${versiculo} registrada hoje! 🔥`);
+                setSelectedVerseModal(null);
+              }}
+              class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-600/10 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition-all border border-emerald-600/30 hover:bg-emerald-600/20"
+            >
+              <Check class="w-4 h-4 text-emerald-600" />
+              <span>Marcar Lido Hoje</span>
+            </button>
+
             <button
               onClick={handleCopy}
-              class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-semibold transition-colors"
+              class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 text-xs font-semibold transition-colors"
             >
               {isCopied ? <Check class="w-4 h-4 text-emerald-500" /> : <Copy class="w-4 h-4" />}
               <span>{isCopied ? 'Copiado!' : 'Copiar'}</span>
@@ -151,11 +172,12 @@ export default function VerseContextMenu() {
 
             <button
               onClick={() => {
+                registrarAtividadeHoje();
                 const modalData = { ...selectedVerseModal, livroNome: livroObj.nome };
                 setSelectedVerseModal(null);
                 setGeminiVerseModal(modalData);
               }}
-              class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 hover:bg-[#7A151C]/20 text-[#7A151C] dark:text-[#8B1C24] text-xs font-bold transition-all border border-[#7A151C]/30"
+              class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#7A151C]/10 dark:bg-[#8B1C24]/20 hover:bg-[#7A151C]/20 text-[#7A151C] dark:text-[#8B1C24] text-xs font-bold transition-all border border-[#7A151C]/30"
             >
               <Sparkles class="w-4 h-4 text-[#7A151C] dark:text-[#8B1C24]" />
               <span>Explicar com Gemini</span>
