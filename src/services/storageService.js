@@ -117,6 +117,21 @@ export const storageService = {
   // Registro diário de leitura (Ofensiva / Streak)
   getRegistrosAtividade() {
     try {
+      const versiculos = this.getVersiculosMarcados();
+      const capitulos = this.getProgressoCapitulos();
+      const plano = this.getPlanoAtivo();
+
+      const temAtividadeReal = 
+        (versiculos && versiculos.length > 0) ||
+        (capitulos && Object.keys(capitulos).length > 0) ||
+        (plano && plano.progressoDias && Object.keys(plano.progressoDias).length > 0);
+
+      // Se o usuário ainda não marcou nenhuma leitura/versículo real, zerar a ofensiva!
+      if (!temAtividadeReal) {
+        localStorage.removeItem(KEYS.ATIVIDADE);
+        return {};
+      }
+
       const data = localStorage.getItem(KEYS.ATIVIDADE);
       if (data) {
         const parsed = JSON.parse(data);
@@ -132,6 +147,13 @@ export const storageService = {
   saveRegistrosAtividade(registros) {
     try {
       localStorage.setItem(KEYS.ATIVIDADE, JSON.stringify(registros));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  resetarRegistrosAtividade() {
+    try {
+      localStorage.removeItem(KEYS.ATIVIDADE);
     } catch (e) {
       console.error(e);
     }

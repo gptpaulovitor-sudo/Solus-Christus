@@ -139,6 +139,12 @@ export function AppProvider({ children }) {
     return count;
   };
 
+  // Sincronizar e zerar a atividade se não houver leitura/marcação real
+  useEffect(() => {
+    const ativ = storageService.getRegistrosAtividade();
+    setRegistrosAtividade(ativ);
+  }, [versiculosMarcados, progressoCapitulos, planoAtivo]);
+
   const ofensivaDias = calcularOfensivaDias(registrosAtividade);
 
   // Alternar capítulo lido
